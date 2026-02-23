@@ -44,11 +44,10 @@
             border-right: 1px solid #e1e4e8;
             flex-shrink: 0;
             margin-left: 0;
-            /* 关键修改：用 margin 动画代替 transform，让出空间 */
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         
-        /* PC 端折叠状态：完全缩进左侧，右侧空间瞬间变大 */
+        /* PC 端折叠状态 */
         #sidebar.collapsed { 
             margin-left: -280px; 
         }
@@ -63,27 +62,58 @@
         .btn-mice { background: #fff3bf; color: #f08c00; border-left: 5px solid #fcc419; }
         .btn-flower { background: #d3f9d8; color: #2b8a3e; border-left: 5px solid #51cf66; }
 
-        /* 信息框美化 */
-        .info-box { margin-top: auto; padding: 15px; background: #fff; border-radius: 10px; border: 1px solid #e9ecef; box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 120px; display: flex; flex-direction: column; }
+        /* 🔥 新增：底部独立的悬浮信息面板 */
+        #bottom-info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) scale(1);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 15px 20px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-out;
+        }
+
         .info-title { font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 1.1em; border-bottom: 2px solid #e1e4e8; padding-bottom: 5px;}
-        .info-text { font-size: 0.9em; color: #555; line-height: 1.6; }
+        .info-text { font-size: 0.9em; color: #555; line-height: 1.6; max-height: 100px; overflow-y: auto; }
         
-        /* 图谱容器：flex-grow 会自动占据所有剩余空间 */
+        /* 图谱容器 */
         #network-container { 
             flex-grow: 1; 
             background: #ffffff; 
             background-image: radial-gradient(#e1e4e8 1px, transparent 1px); 
             background-size: 20px 20px; 
-            width: 100%; /* 确保被弹开时占满宽度 */
+            width: 100%; 
         }
         
-        .legend { position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 13px; line-height: 1.8; pointer-events: none;}
+        /* 调整图例位置到右上角防遮挡 */
+        .legend { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: rgba(255,255,255,0.9); 
+            padding: 12px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            font-size: 13px; 
+            line-height: 1.8; 
+            pointer-events: none;
+            z-index: 998;
+        }
         .dot { width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 8px; }
 
-        /* 🔥 移动端响应式适配 (悬浮抽屉模式) */
+        /* 🔥 移动端响应式适配 */
         @media (max-width: 768px) {
             #sidebar {
-                position: absolute; /* 移动端改为绝对定位，悬浮在图谱上 */
+                position: absolute; 
                 height: 100%;
                 left: 0;
                 top: 0;
@@ -91,15 +121,19 @@
                 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 10px 0 20px rgba(0,0,0,0.2);
             }
-            /* 移动端由于是悬浮层，用 transform 滑出即可，不影响底部图谱 */
             #sidebar.collapsed {
                 margin-left: 0;
                 transform: translateX(-100%); 
             }
+            #bottom-info-panel {
+                bottom: 15px;
+                width: 95%;
+                padding: 12px 15px;
+            }
             .legend {
-                bottom: 80px; 
+                top: 60px; 
                 right: 10px;
-                padding: 10px;
+                padding: 8px;
                 font-size: 11px;
             }
             #toggle-btn {
@@ -123,11 +157,6 @@
     <button class="control-btn btn-mech" onclick="setScenario('mech')">🔬 微观机制 (Mechanism)</button>
     <button class="control-btn btn-mice" onclick="setScenario('mice')">🐁 Agouti小鼠 (饮食)</button>
     <button class="control-btn btn-flower" onclick="setScenario('flower')">🌸 柳穿鱼花型 (突变)</button>
-
-    <div class="info-box">
-        <div class="info-title" id="node-title">👋 准备就绪</div>
-        <div class="info-text" id="node-desc">图谱已载入。点击右侧任意节点可查看详细解析，或点击上方按钮切换特定实验案例。</div>
-    </div>
 </div>
 
 <div id="network-container">
@@ -137,6 +166,11 @@
         <div><span class="dot" style="background:#FF6B6B"></span>表观机制</div>
         <div><span class="dot" style="background:#4AD295"></span>表型结果</div>
     </div>
+</div>
+
+<div id="bottom-info-panel">
+    <div class="info-title" id="node-title">👋 准备就绪</div>
+    <div class="info-text" id="node-desc">图谱已载入。点击图谱中任意节点可查看详细解析，或打开左上角菜单切换特定实验案例。</div>
 </div>
 
 <script>
@@ -225,11 +259,11 @@
     // 切换侧边栏状态
     window.toggleSidebar = function() {
         sidebar.classList.toggle('collapsed');
-        // 等待侧边栏物理空间完全让出（约300ms），通知底层画布自适应放大并重新居中
+        // 等待侧边栏物理空间完全让出，通知底层画布自适应放大并重新居中
         setTimeout(() => { network.fit({animation: {duration: 500}}); }, 300);
     };
 
-    // 场景切换逻辑
+    // 场景切换逻辑 (逻辑未变)
     window.setScenario = function(type) {
         let showNodes = [], showEdges = [];
         if (type === 'all') {
@@ -263,15 +297,19 @@
         }
     };
 
+    // 点击节点逻辑：不再弹出侧边栏，而是让底部的卡片更新并轻微跳动提示
     network.on("click", function (params) {
         if (params.nodes.length) {
             const node = nodes.find(n => n.id === params.nodes[0]);
             document.getElementById('node-title').innerText = node.label.replace('\n', ' ');
             document.getElementById('node-desc').innerText = node.detail || "暂无详细描述。";
             
-            if (window.innerWidth <= 768 && sidebar.classList.contains('collapsed')) {
-                sidebar.classList.remove('collapsed');
-            }
+            // 底部面板跳动动画
+            const panel = document.getElementById('bottom-info-panel');
+            panel.style.transform = 'translateX(-50%) scale(1.03)';
+            setTimeout(() => {
+                panel.style.transform = 'translateX(-50%) scale(1)';
+            }, 200);
         }
     });
     
